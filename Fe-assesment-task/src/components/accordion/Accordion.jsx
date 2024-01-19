@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useState, useEffect } from 'react';
 import Accordion from '@mui/material/Accordion';
 import AccordionActions from '@mui/material/AccordionActions';
 import AccordionSummary from '@mui/material/AccordionSummary';
@@ -6,27 +6,25 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Button from '@mui/material/Button';
 import './Accordion.css';
-// import data from '../../../public/Data/celebrities.json'
 
 export default function AccordionUsage() {
-  const [data, setData] = React.useState([]);
+  const [data, setData] = useState([]);
 
-  React.useEffect(() => {
-    // Fetch data when the component mounts
+  useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
     try {
-      const response = await fetch('../../../Data/celebrities.json'); 
+      const response = await fetch('../../../Data/celebrities.json');
       if (!response.ok) {
         throw new Error('Failed to fetch data');
       }
-      const jsonData = await response.json(); 
+
+      const jsonData = await response.json();
       setData(jsonData);
     } catch (error) {
       console.error('Error fetching data:', error);
-      // Handle the error appropriately (e.g., show an error message to the user)
     }
   };
 
@@ -35,6 +33,12 @@ export default function AccordionUsage() {
     const currentDate = new Date();
     const age = currentDate.getFullYear() - birthDate.getFullYear();
     return age;
+  };
+
+  const handleDeleteClick = (celebId) => {
+    // Create a new array with the filtered data, excluding the one to be deleted
+    const newData = data.filter((celebrity) => celebrity.id !== celebId);
+    setData(newData);
   };
 
   return (
@@ -62,7 +66,7 @@ export default function AccordionUsage() {
           </AccordionDetails>
 
           <AccordionActions>
-            <Button>Delete</Button>
+            <Button onClick={() => handleDeleteClick(celebrity.id)}>Delete</Button>
             <Button>Edit</Button>
           </AccordionActions>
         </Accordion>
