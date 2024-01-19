@@ -1,0 +1,27 @@
+.wrapper-accordion{
+    display: flex;
+    flex-direction: column;
+    margin-top: 70px ;
+    margin: 0 auto;
+    max-width: 50%;
+    word-wrap: break-word;
+}
+
+.accordion-margin{
+    margin-top: 25px;
+}
+
+.accordion-top{
+    display: flex;
+    align-items: center;
+}
+
+.accordion-top > p {
+ margin-left: 20px;
+ margin-top: 10px;
+}
+
+.accordion-top > img {
+   height: 40px;
+   width: 40px
+ }
