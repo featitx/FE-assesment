@@ -5,21 +5,14 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
+import SearchFilter from '../SearchFilter';
+import DeleteConfirmation from '../DeleteConfirmation';
 import './Accordion.css';
-import UpdateForm from '../update';
 
 export default function AccordionUsage() {
   const [data, setData] = useState([]);
-  const [deleteConfirmation, setDeleteConfirmation] = useState(false);
-  const [selectedCelebId, setSelectedCelebId] = useState(null);
-
-
-  //Fetching Json Data
+  const [deleteConfirmation, setDeleteConfirmation] = useState({ open: false, celebId: null });
+  const [searchedData, setSearchedData] = useState([]);
 
   useEffect(() => {
     fetchData();
@@ -34,12 +27,12 @@ export default function AccordionUsage() {
 
       const jsonData = await response.json();
       setData(jsonData);
+      setSearchedData(jsonData); // Initialize searchedData with all data
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   };
 
-  // calculate age function
   const calculateAge = (dob) => {
     const birthDate = new Date(dob);
     const currentDate = new Date();
@@ -48,72 +41,74 @@ export default function AccordionUsage() {
   };
 
   const handleDeleteClick = (celebId) => {
-    setSelectedCelebId(celebId);
-    setDeleteConfirmation(true);
+    setDeleteConfirmation({ open: true, celebId });
   };
 
-  
   const handleDeleteConfirmation = (confirmed) => {
     if (confirmed) {
       // Create a new array with the filtered data, excluding the one to be deleted
-      const newData = data.filter((celebrity) => celebrity.id !== selectedCelebId);
+      const newData = data.filter((celebrity) => celebrity.id !== deleteConfirmation.celebId);
       setData(newData);
+      setSearchedData(newData); // Update searchedData after deletion
     }
-    setDeleteConfirmation(false);
+    setDeleteConfirmation({ open: false, celebId: null });
   };
 
+
+  // Filter data based on search query for name, age, and gender
+const handleSearch = (query) => {
+  const filteredData = data.filter(
+    (celebrity) =>
+      celebrity.first.toLowerCase().includes(query.toLowerCase()) ||
+      celebrity.last.toLowerCase().includes(query.toLowerCase()) ||
+      String(calculateAge(celebrity.dob)).includes(query) ||
+      celebrity.gender.toLowerCase().includes(query.toLowerCase())
+  );
+  setSearchedData(filteredData);
+};
+
+
+
+
   return (
-    <div className='wrapper-accordion'>
-      {data.map((celebrity) => (
-        <Accordion key={celebrity.id} defaultExpanded className='accordion-margin'>
-          <AccordionSummary
-            expandIcon={<ExpandMoreIcon />}
-            aria-controls="panel3-content"
-            id="panel3-header"
-          >
-            <div className="accordion-top">
-              <img src={celebrity.picture} alt={`Avatar of ${celebrity.first}`} />
-              <p>{`${celebrity.first} ${celebrity.last}`}</p>
-            </div>
-          </AccordionSummary>
+    <div className='wrapped-item'>
 
-          <AccordionDetails>
-            <div>
-              <p>Age: {calculateAge(celebrity.dob)}</p>
-              <p>Gender: {celebrity.gender}</p>
-              <p>Country: {celebrity.country}</p>
-              <p>Description: {celebrity.description}</p>
-            </div>
-          </AccordionDetails>
+      <SearchFilter onSearch={handleSearch} />
+      <div className='wrapper-accordion'>
+        {searchedData.map((celebrity) => (
+          <Accordion key={celebrity.id} defaultExpanded={false} className='accordion-margin'>
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              aria-controls="panel3-content"
+              id="panel3-header"
+            >
+              <div className="accordion-top">
+                <img src={celebrity.picture} alt={`Avatar of ${celebrity.first}`} />
+                <p>{`${celebrity.first} ${celebrity.last}`}</p>
+              </div>
+            </AccordionSummary>
 
-          <AccordionActions>
-            <Button onClick={() => handleDeleteClick(celebrity.id)}>Delete</Button>
-            <Button>Edit</Button>
-          </AccordionActions>
-        </Accordion>
-      ))}
+            <AccordionDetails>
+              <div>
+                <p>Age: {calculateAge(celebrity.dob)}</p>
+                <p>Gender: {celebrity.gender}</p>
+                <p>Country: {celebrity.country}</p>
+                <p>Description: {celebrity.description}</p>
+              </div>
+            </AccordionDetails>
 
-      <Dialog
-        open={deleteConfirmation}
-        onClose={() => handleDeleteConfirmation(false)}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">Delete Confirmation</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            Are you sure you want to delete this celebrity?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => handleDeleteConfirmation(false)} color="primary">
-            No
-          </Button>
-          <Button onClick={() => handleDeleteConfirmation(true)} color="primary" autoFocus>
-            Yes
-          </Button>
-        </DialogActions>
-      </Dialog>
+            <AccordionActions>
+              <Button onClick={() => handleDeleteClick(celebrity.id)}>Delete</Button>
+              <Button>Edit</Button>
+            </AccordionActions>
+          </Accordion>
+        ))}
+
+        <DeleteConfirmation
+          open={deleteConfirmation.open}
+          onClose={(confirmed) => handleDeleteConfirmation(confirmed)}
+        />
+      </div>
     </div>
   );
 }
