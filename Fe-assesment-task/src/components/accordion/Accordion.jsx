@@ -6,21 +6,36 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Button from '@mui/material/Button';
 import './Accordion.css';
-import data from '../../celebrities.json';
+// import data from '../../../public/Data/celebrities.json'
 
 export default function AccordionUsage() {
+  const [data, setData] = React.useState([]);
 
+  React.useEffect(() => {
+    // Fetch data when the component mounts
+    fetchData();
+  }, []);
 
-    const calculateAge = (dob) => {
-        const birthDate = new Date(dob);
-        const currentDate = new Date();
-        const age = currentDate.getFullYear() - birthDate.getFullYear();
-        return age;
-      };
-      
+  const fetchData = async () => {
+    try {
+      const response = await fetch('../../../Data/celebrities.json'); 
+      if (!response.ok) {
+        throw new Error('Failed to fetch data');
+      }
+      const jsonData = await response.json(); 
+      setData(jsonData);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      // Handle the error appropriately (e.g., show an error message to the user)
+    }
+  };
 
-
-
+  const calculateAge = (dob) => {
+    const birthDate = new Date(dob);
+    const currentDate = new Date();
+    const age = currentDate.getFullYear() - birthDate.getFullYear();
+    return age;
+  };
 
   return (
     <div className='wrapper-accordion'>
@@ -47,8 +62,8 @@ export default function AccordionUsage() {
           </AccordionDetails>
 
           <AccordionActions>
-            <Button>Cancel</Button>
-            <Button>Agree</Button>
+            <Button>Delete</Button>
+            <Button>Edit</Button>
           </AccordionActions>
         </Accordion>
       ))}
