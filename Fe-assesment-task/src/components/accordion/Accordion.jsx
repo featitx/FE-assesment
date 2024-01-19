@@ -5,10 +5,21 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 import './Accordion.css';
+import UpdateForm from '../update';
 
 export default function AccordionUsage() {
   const [data, setData] = useState([]);
+  const [deleteConfirmation, setDeleteConfirmation] = useState(false);
+  const [selectedCelebId, setSelectedCelebId] = useState(null);
+
+
+  //Fetching Json Data
 
   useEffect(() => {
     fetchData();
@@ -28,6 +39,7 @@ export default function AccordionUsage() {
     }
   };
 
+  // calculate age function
   const calculateAge = (dob) => {
     const birthDate = new Date(dob);
     const currentDate = new Date();
@@ -36,9 +48,18 @@ export default function AccordionUsage() {
   };
 
   const handleDeleteClick = (celebId) => {
-    // Create a new array with the filtered data, excluding the one to be deleted
-    const newData = data.filter((celebrity) => celebrity.id !== celebId);
-    setData(newData);
+    setSelectedCelebId(celebId);
+    setDeleteConfirmation(true);
+  };
+
+  
+  const handleDeleteConfirmation = (confirmed) => {
+    if (confirmed) {
+      // Create a new array with the filtered data, excluding the one to be deleted
+      const newData = data.filter((celebrity) => celebrity.id !== selectedCelebId);
+      setData(newData);
+    }
+    setDeleteConfirmation(false);
   };
 
   return (
@@ -71,6 +92,28 @@ export default function AccordionUsage() {
           </AccordionActions>
         </Accordion>
       ))}
+
+      <Dialog
+        open={deleteConfirmation}
+        onClose={() => handleDeleteConfirmation(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">Delete Confirmation</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to delete this celebrity?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => handleDeleteConfirmation(false)} color="primary">
+            No
+          </Button>
+          <Button onClick={() => handleDeleteConfirmation(true)} color="primary" autoFocus>
+            Yes
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }
