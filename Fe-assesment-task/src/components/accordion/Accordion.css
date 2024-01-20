@@ -34,3 +34,9 @@
     justify-content: center;
     padding: 50px;
  }
+
+ .flex-name{
+    display: flex;
+    justify-content: space-between;
+    width: 40%;
+ }
